@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Messaging App</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f1f1f1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .chat-container {
+        background-color: #fff;
+        width: 350px;
+        height: 500px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    .chat-header {
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .message {
+        padding: 10px;
+        border-radius: 10px;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+
+    .sent {
+        background-color: #DCF8C6;
+        align-self: flex-end;
+    }
+
+    .received {
+        background-color: #E5E5EA;
+        align-self: flex-start;
+    }
+
+    .chat-input {
+        display: flex;
+        border-top: 1px solid #ccc;
+    }
+
+    .chat-input input {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        outline: none;
+        font-size: 16px;
+    }
+
+    .chat-input button {
+        padding: 15px;
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .chat-input button:hover {
+        background-color: #45a049;
+    }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">Messaging App</div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    const chatMessages = document.getElementById('chatMessages');
+    const messageInput = document.getElementById('messageInput');
+
+    function sendMessage() {
+        const messageText = messageInput.value.trim();
+        if (messageText === '') return;
+
+        // Create message div
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'sent');
+        messageDiv.textContent = messageText;
+        chatMessages.appendChild(messageDiv);
+
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Clear input
+        messageInput.value = '';
+
+        // Simulate a received reply after 1 second
+        setTimeout(() => {
+            const replyDiv = document.createElement('div');
+            replyDiv.classList.add('message', 'received');
+            replyDiv.textContent = "Received: " + messageText;
+            chatMessages.appendChild(replyDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 1000);
+    }
+
+    // Send message on Enter key
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+</script>
+
+</body>
+</html>
