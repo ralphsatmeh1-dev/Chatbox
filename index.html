@@ -3,138 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simple Messaging App</title>
+<title>Website Chat</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f1f1f1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-
-    .chat-container {
-        background-color: #fff;
-        width: 350px;
-        height: 500px;
-        display: flex;
-        flex-direction: column;
-        border-radius: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        overflow: hidden;
-    }
-
-    .chat-header {
-        background-color: #4CAF50;
-        color: white;
-        padding: 15px;
-        text-align: center;
-        font-weight: bold;
-        font-size: 18px;
-    }
-
-    .chat-messages {
-        flex: 1;
-        padding: 10px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .message {
-        padding: 10px;
-        border-radius: 10px;
-        max-width: 70%;
-        word-wrap: break-word;
-    }
-
-    .sent {
-        background-color: #DCF8C6;
-        align-self: flex-end;
-    }
-
-    .received {
-        background-color: #E5E5EA;
-        align-self: flex-start;
-    }
-
-    .chat-input {
-        display: flex;
-        border-top: 1px solid #ccc;
-    }
-
-    .chat-input input {
-        flex: 1;
-        padding: 15px;
-        border: none;
-        outline: none;
-        font-size: 16px;
-    }
-
-    .chat-input button {
-        padding: 15px;
-        background-color: #4CAF50;
-        border: none;
-        color: white;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-    .chat-input button:hover {
-        background-color: #45a049;
-    }
+body { font-family: Arial; display:flex; justify-content:center; margin-top:20px; background:#f1f1f1;}
+#chat { width:350px; border:1px solid #ccc; padding:10px; border-radius:10px; background:#fff;}
+#messages { height:300px; overflow-y:auto; border-bottom:1px solid #ccc; margin-bottom:10px; padding:5px; }
+.message { margin:5px 0; }
+input, button { width:100%; margin-bottom:5px; padding:10px; font-size:14px; }
+button { background-color:#4CAF50; color:white; border:none; cursor:pointer; }
+button:hover { background-color:#45a049; }
 </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div class="chat-header">Messaging App</div>
-    <div class="chat-messages" id="chatMessages"></div>
-    <div class="chat-input">
-        <input type="text" id="messageInput" placeholder="Type a message...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
+<div id="chat">
+  <div id="messages"></div>
+  <input id="name" placeholder="Your name">
+  <input id="message" placeholder="Type a message">
+  <button onclick="sendMessage()">Send</button>
 </div>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-    const chatMessages = document.getElementById('chatMessages');
-    const messageInput = document.getElementById('messageInput');
+  // Replace with your Firebase config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
 
-    function sendMessage() {
-        const messageText = messageInput.value.trim();
-        if (messageText === '') return;
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const messagesDiv = document.getElementById('messages');
 
-        // Create message div
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', 'sent');
-        messageDiv.textContent = messageText;
-        chatMessages.appendChild(messageDiv);
+  // Listen for messages
+  db.ref("messages").on("child_added", snapshot => {
+    const data = snapshot.val();
+    const div = document.createElement("div");
+    div.className = "message";
+    div.textContent = data.name + ": " + data.text;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  });
 
-        // Scroll to bottom
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+  function sendMessage() {
+    const name = document.getElementById("name").value || "Anonymous";
+    const text = document.getElementById("message").value;
+    if (!text) return;
 
-        // Clear input
-        messageInput.value = '';
+    db.ref("messages").push({ name, text });
+    document.getElementById("message").value = '';
+  }
 
-        // Simulate a received reply after 1 second
-        setTimeout(() => {
-            const replyDiv = document.createElement('div');
-            replyDiv.classList.add('message', 'received');
-            replyDiv.textContent = "Received: " + messageText;
-            chatMessages.appendChild(replyDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 1000);
-    }
-
-    // Send message on Enter key
-    messageInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+  document.getElementById("message").addEventListener("keydown", e => {
+    if (e.key === "Enter") sendMessage();
+  });
 </script>
 
 </body>
